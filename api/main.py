@@ -1,11 +1,21 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.middleware.cors import CORSMiddleware
 import os
 import aiofiles
 from pathlib import Path
 import uuid
 
 app = FastAPI()
+
+# Add CORS middleware for React frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Create uploads directory if it doesn't exist
 UPLOAD_DIR = Path("uploads/resumes")
@@ -20,11 +30,9 @@ async def upload_resume(file: UploadFile = File(...)):
     """
     Upload a resume file (PDF, DOC, DOCX, or TXT)
     """
-    # Check if file was actually uploaded
     if not file.filename:
         raise HTTPException(status_code=400, detail="No file uploaded")
     
-    # Check file extension
     file_extension = Path(file.filename).suffix.lower()
     if file_extension not in ALLOWED_EXTENSIONS:
         raise HTTPException(
@@ -32,7 +40,6 @@ async def upload_resume(file: UploadFile = File(...)):
             detail=f"File type not allowed. Allowed types: {', '.join(ALLOWED_EXTENSIONS)}"
         )
     
-    # Read file content to check size
     content = await file.read()
     if len(content) > MAX_FILE_SIZE:
         raise HTTPException(
@@ -40,12 +47,10 @@ async def upload_resume(file: UploadFile = File(...)):
             detail=f"File too large. Maximum size: {MAX_FILE_SIZE // (1024*1024)}MB"
         )
     
-    # Generate unique filename to avoid conflicts
     unique_filename = f"{uuid.uuid4()}{file_extension}"
     file_path = UPLOAD_DIR / unique_filename
     
     try:
-        # Save file asynchronously
         async with aiofiles.open(file_path, 'wb') as f:
             await f.write(content)
         
@@ -61,7 +66,6 @@ async def upload_resume(file: UploadFile = File(...)):
         )
     
     except Exception as e:
-        # Clean up file if something went wrong
         if file_path.exists():
             os.remove(file_path)
         raise HTTPException(status_code=500, detail=f"Failed to save file: {str(e)}")
@@ -70,12 +74,9 @@ async def upload_resume(file: UploadFile = File(...)):
 async def root():
     return {"message": "Resume Upload API"}
 
-# Optional: Endpoint to list uploaded resumes
 @app.get("/resumes/")
 async def list_resumes():
-    """
-    List all uploaded resume files
-    """
+    """List all uploaded resume files"""
     try:
         files = []
         for file_path in UPLOAD_DIR.iterdir():
@@ -89,12 +90,9 @@ async def list_resumes():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to list files: {str(e)}")
 
-# Optional: Endpoint to download a resume
 @app.get("/download-resume/{filename}")
 async def download_resume(filename: str):
-    """
-    Download a specific resume file
-    """
+    """Download a specific resume file"""
     file_path = UPLOAD_DIR / filename
     
     if not file_path.exists():
