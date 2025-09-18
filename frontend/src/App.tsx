@@ -66,7 +66,7 @@ function App() {
 
       {/* Footer */}
       <footer className="modern-footer">
-        <p>&copy; 2024 JobMatch AI. Powered by advanced AI technology.</p>
+        <p>&copy; 2025 JobMatch AI. Powered by advanced AI technology.</p>
       </footer>
     </div>
   );
