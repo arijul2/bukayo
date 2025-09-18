@@ -13,3 +13,13 @@ starlette==0.47.3
 typing-inspection==0.4.1
 typing_extensions==4.15.0
 uvicorn==0.35.0
+
+# LangChain and AI dependencies
+langchain==0.3.7
+langchain-community==0.3.5
+langchain-openai==0.2.8
+openai==1.54.4
+
+# Document processing dependencies
+pypdf2==3.0.1
+python-docx==1.1.2
