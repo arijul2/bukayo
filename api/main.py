@@ -5,6 +5,7 @@ import os
 import aiofiles
 from pathlib import Path
 import uuid
+from document_processor import DocumentProcessor
 
 app = FastAPI()
 
@@ -22,6 +23,9 @@ RESUME_UPLOAD_DIR = Path("uploads/resumes")
 JOB_UPLOAD_DIR = Path("uploads/job_descriptions")
 RESUME_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 JOB_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+
+# Initialize document processor
+doc_processor = DocumentProcessor()
 
 # Allowed file extensions
 ALLOWED_EXTENSIONS = {".pdf", ".doc", ".docx", ".txt"}
@@ -114,6 +118,42 @@ async def upload_job_description(file: UploadFile = File(...)):
         if file_path.exists():
             os.remove(file_path)
         raise HTTPException(status_code=500, detail=f"Failed to save file: {str(e)}")
+
+@app.post("/process-document/{filename}")
+async def process_document(filename: str, doc_type: str):
+    """Test endpoint to process a document and extract text"""
+    if doc_type == "resume":
+        file_path = RESUME_UPLOAD_DIR / filename
+        if not file_path.exists():
+            raise HTTPException(status_code=404, detail="Resume file not found")
+        
+        try:
+            result = doc_processor.process_resume(str(file_path))
+            return JSONResponse(content={
+                "message": "Resume processed successfully",
+                "filename": filename,
+                "processing_result": result
+            })
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Failed to process resume: {str(e)}")
+    
+    elif doc_type == "job_description":
+        file_path = JOB_UPLOAD_DIR / filename
+        if not file_path.exists():
+            raise HTTPException(status_code=404, detail="Job description file not found")
+        
+        try:
+            result = doc_processor.process_job_description(str(file_path))
+            return JSONResponse(content={
+                "message": "Job description processed successfully",
+                "filename": filename,
+                "processing_result": result
+            })
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Failed to process job description: {str(e)}")
+    
+    else:
+        raise HTTPException(status_code=400, detail="doc_type must be 'resume' or 'job_description'")
 
 @app.get("/")
 async def root():
