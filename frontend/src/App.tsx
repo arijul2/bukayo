@@ -1,5 +1,6 @@
 import React from "react";
 import FileUpload from "./components/FileUpload";
+import JobDescriptionUpload from "./components/JobDescriptionUpload";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function App() {
@@ -11,7 +12,16 @@ function App() {
         </div>
       </nav>
 
-      <FileUpload />
+      <div className="container-fluid">
+        <div className="row">
+          <div className="col-md-6">
+            <FileUpload />
+          </div>
+          <div className="col-md-6">
+            <JobDescriptionUpload />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
