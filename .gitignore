@@ -247,4 +247,5 @@ frontend/coverage/
 # Package files at root (if not needed)
 /package.json
 /package-lock.json
-EOF
+EOF.DS_Store
+**/.DS_Store
