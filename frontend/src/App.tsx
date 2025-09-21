@@ -33,21 +33,8 @@ function App() {
 
           {/* Upload Cards Grid */}
           <div className="upload-grid">
-            <div className="upload-card resume-card">
-              <div className="card-header">
-                <div className="card-icon">📄</div>
-                <h3>Upload Resume</h3>
-              </div>
-              <FileUpload />
-            </div>
-
-            <div className="upload-card job-card">
-              <div className="card-header">
-                <div className="card-icon">💼</div>
-                <h3>Upload Job Description</h3>
-              </div>
-              <JobDescriptionUpload />
-            </div>
+            <FileUpload />
+            <JobDescriptionUpload />
           </div>
 
           {/* AI Analysis Section */}
@@ -57,7 +44,7 @@ function App() {
 
       {/* Footer */}
       <footer className="modern-footer">
-        <p>&copy; 2024 JobMatch AI. Powered by advanced AI technology.</p>
+        <p>&copy; 2024 JobsMatch AI. Powered by advanced AI technology.</p>
       </footer>
     </div>
   );
