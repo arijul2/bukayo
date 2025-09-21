@@ -12,7 +12,7 @@ function App() {
         <div className="header-content">
           <div className="logo-section">
             <div className="logo-icon">🚀</div>
-            <h1 className="app-title">JobMatch AI</h1>
+            <h1 className="app-title">JobsMatch AI</h1>
           </div>
           <p className="app-subtitle">Smart Resume Analysis & Job Matching</p>
         </div>
