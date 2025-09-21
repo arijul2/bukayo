@@ -81,66 +81,64 @@ const FileUpload: React.FC = () => {
   };
 
   return (
-    <div className="container mt-5">
-      <div className="card">
-        <div className="card-header bg-primary text-white">
-          <h3 className="mb-0">Upload Your Resume</h3>
+    <div className="upload-card resume-card">
+      <div className="card-header">
+        <div className="card-icon">📄</div>
+        <h3>Upload Resume</h3>
+      </div>
+      <div className="card-body">
+        <div className="mb-3">
+          <label htmlFor="file-input" className="form-label">
+            Select Resume File (PDF, DOC, DOCX, or TXT)
+          </label>
+          <input
+            type="file"
+            className="form-control"
+            id="file-input"
+            accept=".pdf,.doc,.docx,.txt"
+            onChange={handleFileChange}
+            disabled={loading}
+          />
         </div>
-        <div className="card-body">
-          <div className="mb-3">
-            <label htmlFor="file-input" className="form-label">
-              Select Resume File (PDF, DOC, DOCX, or TXT)
-            </label>
-            <input
-              type="file"
-              className="form-control"
-              id="file-input"
-              accept=".pdf,.doc,.docx,.txt"
-              onChange={handleFileChange}
-              disabled={loading}
-            />
+
+        {file && (
+          <div className="alert alert-info">
+            <strong>Selected:</strong> {file.name} (
+            {(file.size / 1024).toFixed(2)} KB)
           </div>
+        )}
 
-          {file && (
-            <div className="alert alert-info">
-              <strong>Selected:</strong> {file.name} (
-              {(file.size / 1024).toFixed(2)} KB)
-            </div>
+        {error && <div className="alert alert-danger">{error}</div>}
+
+        {response && (
+          <div className="alert alert-success">
+            <h5>Upload Successful!</h5>
+            <p>
+              <strong>File saved as:</strong> {response.filename}
+            </p>
+            <p>
+              <strong>Original name:</strong> {response.original_filename}
+            </p>
+            <p>
+              <strong>Size:</strong> {(response.file_size / 1024).toFixed(2)} KB
+            </p>
+          </div>
+        )}
+
+        <button
+          className="btn btn-primary"
+          onClick={handleUpload}
+          disabled={!file || loading}
+        >
+          {loading ? (
+            <>
+              <span className="spinner-border spinner-border-sm me-2"></span>
+              Uploading...
+            </>
+          ) : (
+            "Upload Resume"
           )}
-
-          {error && <div className="alert alert-danger">{error}</div>}
-
-          {response && (
-            <div className="alert alert-success">
-              <h5>Upload Successful!</h5>
-              <p>
-                <strong>File saved as:</strong> {response.filename}
-              </p>
-              <p>
-                <strong>Original name:</strong> {response.original_filename}
-              </p>
-              <p>
-                <strong>Size:</strong> {(response.file_size / 1024).toFixed(2)}{" "}
-                KB
-              </p>
-            </div>
-          )}
-
-          <button
-            className="btn btn-primary"
-            onClick={handleUpload}
-            disabled={!file || loading}
-          >
-            {loading ? (
-              <>
-                <span className="spinner-border spinner-border-sm me-2"></span>
-                Uploading...
-              </>
-            ) : (
-              "Upload Resume"
-            )}
-          </button>
-        </div>
+        </button>
       </div>
     </div>
   );
