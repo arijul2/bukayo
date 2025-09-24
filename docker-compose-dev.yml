@@ -1,0 +1,12 @@
+services:
+  api:
+    platform: linux/amd64
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./api
+    volumes:
+      - ./api:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_KEY=$OPENAI_API_KEY
