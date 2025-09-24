@@ -30,7 +30,7 @@ JOB_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 doc_processor = DocumentProcessor()
 
 # Initialize job matcher (you'll need to set your OpenAI API key)
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
 if not OPENAI_API_KEY:
     # You can either set this as environment variable or hardcode it temporarily
     # For production, always use environment variables!
