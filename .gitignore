@@ -250,5 +250,21 @@ frontend/coverage/
 # Package files at root (if not needed)
 /package.json
 /package-lock.json
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+crash.log
+crash.*.log
+*.tfplan
+*.tfplan.*
+.terraformrc
+terraform.rc
+
 EOF.DS_Store
 **/.DS_Store
+infra/deploy/terraform.tfstate
+infra/deploy/terraform.tfstate.backup
+infra/deploy/.terraform.lock.hcl

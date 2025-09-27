@@ -1,0 +1,29 @@
+# AWS Configuration
+aws_region            = "us-west-2"
+aws_access_key_id     = "your-access-key-id"
+aws_secret_access_key = "your-secret-access-key"
+
+# Project Configuration
+project_name = "bukayo"
+environment  = "dev"
+
+# VPC Configuration (simplified - private subnets only)
+vpc_cidr             = "10.0.0.0/16"
+private_subnet_cidrs = ["10.0.1.0/24", "10.0.2.0/24"]
+
+# Elastic Beanstalk Configuration
+solution_stack_name = "64bit Amazon Linux 2023 v4.1.4 running Python 3.11"
+instance_type       = "t3.micro"
+min_size           = "1"
+max_size           = "3"
+
+# Application Configuration
+application_port    = 8000
+health_check_path   = "/"
+
+# Common Tags
+common_tags = {
+  Project     = "bukayo"
+  Environment = "dev"
+  ManagedBy   = "terraform"
+}
