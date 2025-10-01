@@ -123,3 +123,8 @@ After deployment:
 2. Configure custom domain (optional)
 3. Set up SSL/TLS certificates (optional)
 4. Configure monitoring and logging
+
+
+## Running Docker Containers in Dev
+
+docker-compose -f docker-compose-dev.yml --env-file ./.env.dev up --build

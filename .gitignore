@@ -210,9 +210,6 @@ marimo/_lsp/
 __marimo__/
 
 
-# Add these to your existing .gitignore
-cat >> .gitignore << 'EOF'
-
 # Node modules and npm
 node_modules/
 frontend/node_modules/
@@ -265,6 +262,9 @@ terraform.rc
 
 EOF.DS_Store
 **/.DS_Store
+
+# Additional Terraform files
 infra/deploy/terraform.tfstate
 infra/deploy/terraform.tfstate.backup
 infra/deploy/.terraform.lock.hcl
+infra/deploy/.terraform/providers/registry.terraform.io/hashicorp/aws/4.67.0/darwin_amd64/terraform-provider-aws_v4.67.0_x5

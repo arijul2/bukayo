@@ -15,7 +15,7 @@ const JobDescriptionUpload: React.FC = () => {
   const [response, setResponse] = useState<UploadResponse | null>(null);
   const [error, setError] = useState<string>("");
 
-  const API_URL = "http://localhost:8000";
+  const API_URL = "/api";
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {

@@ -1,0 +1,17 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "3P5XXV75K6.com.tregglio.myteamdeck",
+        "paths": ["/invite/*"]
+      }
+    ]
+  },
+  "activitycontinuation": {
+    "apps": ["3P5XXV75K6.com.tregglio.myteamdeck"]
+  },
+  "webcredentials": {
+    "apps": ["3P5XXV75K6.com.tregglio.myteamdeck"]
+  }
+}

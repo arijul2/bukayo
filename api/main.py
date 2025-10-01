@@ -14,10 +14,10 @@ app = FastAPI(title="JobMatch AI API", version="1.0.0")
 # Add CORS middleware for React frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"],
+    allow_headers=["*"],        
 )
 
 # Create uploads directories if they don't exist

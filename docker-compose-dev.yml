@@ -1,4 +1,16 @@
 services:
+  nginx:
+    depends_on:
+      - frontend
+      - api
+    restart: always
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./nginx
+    ports:
+      - "3000:80"
+    
+
   api:
     platform: linux/amd64
     build:
@@ -6,16 +18,17 @@ services:
       context: ./api
     volumes:
       - ./api:/app
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
     environment:
       - OPENAI_API_KEY=$OPENAI_API_KEY
+
   frontend:
     build:
       dockerfile: Dockerfile.dev
       context: ./frontend
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
     volumes:
       - /app/node_modules
       - ./frontend:/app

@@ -31,7 +31,7 @@ const JobAnalysis: React.FC = () => {
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState<string>("");
 
-  const API_URL = "http://localhost:8000";
+  const API_URL = "/api";
 
   // Fetch uploaded files on component mount
   useEffect(() => {
