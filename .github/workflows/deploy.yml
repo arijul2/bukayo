@@ -182,4 +182,4 @@ jobs:
           region: ${{ env.AWS_REGION }}
           deployment_package: deploy.zip
       
-      - run: echo "🎉 Production deployment status: ${{ job.status }}."
+      - run: echo "Production deployment completed successfully!"
