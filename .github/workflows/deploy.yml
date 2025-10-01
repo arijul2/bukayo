@@ -21,16 +21,10 @@ on:
       environment:
         description: 'Environment to deploy to'
         required: true
-        default: 'staging'
+        default: 'production'
         type: choice
         options:
-          - staging
           - production
-      promote_from_staging:
-        description: 'Promote from staging to production'
-        required: false
-        default: false
-        type: boolean
 
 env:
   AWS_REGION: us-west-2
@@ -148,50 +142,10 @@ jobs:
           path: deploy.zip
           retention-days: 1
 
-  deploy-staging:
-    needs: [test-api, test-frontend, build-and-push, generate-deployment-package]
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging')
-    runs-on: ubuntu-latest
-    environment: staging
-    steps:
-      - name: Check out repository code
-        uses: actions/checkout@v4
-      
-      - name: Download deployment package
-        uses: actions/download-artifact@v4
-        with:
-          name: deploy-package
-          path: .
-      
-      - name: Get timestamp
-        uses: gerred/actions/current-time@master
-        id: current-time
-      
-      - name: Format timestamp
-        uses: frabert/replace-string-action@master
-        id: format-time
-        with:
-          pattern: '[:\.]+'
-          string: "${{ steps.current-time.outputs.time }}"
-          replace-with: '-'
-          flags: 'g'
-      
-      - name: Deploy to staging
-        uses: einaregilsson/beanstalk-deploy@v16
-        with:
-          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          application_name: ${{ env.STAGING_APP_NAME }}
-          environment_name: ${{ env.STAGING_ENV_NAME }}
-          version_label: "staging-${{ steps.format-time.outputs.replaced }}"
-          region: ${{ env.AWS_REGION }}
-          deployment_package: deploy.zip
-      
-      - run: echo "🍏 Staging deployment status: ${{ job.status }}."
 
   deploy-production:
     needs: [test-api, test-frontend, build-and-push, generate-deployment-package]
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production'
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production')
     runs-on: ubuntu-latest
     environment: production
     steps:
