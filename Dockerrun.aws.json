@@ -1,0 +1,76 @@
+{
+  "AWSEBDockerrunVersion": 2,
+  "containerDefinitions": [
+    {
+      "name": "nginx",
+      "image": "your-dockerhub-username/jobsmatch-nginx:latest",
+      "essential": true,
+      "memory": 256,
+      "portMappings": [
+        {
+          "hostPort": 80,
+          "containerPort": 80
+        }
+      ],
+      "mountPoints": [
+        {
+          "sourceVolume": "awseb-logs-nginx",
+          "containerPath": "/var/log/nginx"
+        }
+      ]
+    },
+    {
+      "name": "frontend",
+      "image": "your-dockerhub-username/jobsmatch-frontend:latest",
+      "essential": true,
+      "memory": 256,
+      "portMappings": [
+        {
+          "hostPort": 3000,
+          "containerPort": 80
+        }
+      ],
+      "mountPoints": [
+        {
+          "sourceVolume": "awseb-logs-frontend",
+          "containerPath": "/var/log/nginx"
+        }
+      ]
+    },
+    {
+      "name": "backend",
+      "image": "your-dockerhub-username/jobsmatch-api:latest",
+      "essential": true,
+      "memory": 512,
+      "portMappings": [
+        {
+          "hostPort": 8000,
+          "containerPort": 8000
+        }
+      ],
+      "environment": [
+        {
+          "name": "OPENAI_API_KEY",
+          "value": "your-openai-api-key-here"
+        }
+      ],
+      "mountPoints": [
+        {
+          "sourceVolume": "awseb-logs-backend",
+          "containerPath": "/var/log"
+        }
+      ]
+    }
+  ],
+  "volumes": [
+    {
+      "name": "awseb-logs-nginx"
+    },
+    {
+      "name": "awseb-logs-frontend"
+    },
+    {
+      "name": "awseb-logs-backend"
+    }
+  ]
+}

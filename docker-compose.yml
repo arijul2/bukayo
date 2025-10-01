@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  nginx:
+    depends_on:
+      - frontend
+      - api
+    restart: always
+    build:
+      dockerfile: Dockerfile.production
+      context: ./nginx
+    ports:
+      - "80:80"
+
+  api:
+    platform: linux/amd64
+    build:
+      dockerfile: Dockerfile
+      context: ./api
+    volumes:
+      - ./api/uploads:/app/uploads
+    expose:
+      - "8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+
+  frontend:
+    build:
+      dockerfile: Dockerfile
+      context: ./frontend
+    expose:
+      - "80"

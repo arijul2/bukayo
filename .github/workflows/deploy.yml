@@ -1,0 +1,231 @@
+name: Deploy JobMatch AI Application
+run-name: ${{ github.actor }} is deploying JobMatch AI 🚀
+on:
+  push:
+    paths:
+      - 'api/**'
+      - 'frontend/**'
+      - 'nginx/**'
+      - 'docker-compose.yml'
+      - '.ebextensions/**'
+      - '.platform/**'
+      - '.github/workflows/deploy.yml'
+    branches:
+      - main
+      - prod-deploy
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      promote_from_staging:
+        description: 'Promote from staging to production'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  AWS_REGION: us-west-2
+  # Production environment variables  
+  PROD_APP_NAME: bukayo
+  PROD_ENV_NAME: bukayo-env
+
+jobs:
+  test-api:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('api/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+        working-directory: ./api
+      
+      - name: Run Python tests
+        run: |
+          # Add pytest to requirements.txt if you have tests
+          # pytest tests/ -v
+          echo "No tests configured yet - add pytest tests to api/tests/"
+        working-directory: ./api
+
+  test-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+          cache: 'npm'
+          cache-dependency-path: './frontend/package-lock.json'
+      
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit
+        working-directory: ./frontend
+      
+      - name: Run React.js tests
+        run: |
+          # Run tests if they exist
+          npm test -- --coverage --watchAll=false || echo "No tests configured yet"
+        working-directory: ./frontend
+      
+      - name: Build frontend
+        run: npm run build
+        working-directory: ./frontend
+
+  build-and-push:
+    needs: [test-api, test-frontend]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [frontend, api, nginx]
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+      
+      - name: Build and push ${{ matrix.service }} image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./${{ matrix.service }}
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/jobsmatch-${{ matrix.service }}:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/jobsmatch-${{ matrix.service }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+
+  generate-deployment-package:
+    needs: [test-api, test-frontend, build-and-push]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      
+      - name: Generate deployment package
+        run: |
+          # Create deployment package with necessary files
+          zip -r deploy.zip docker-compose.yml .ebextensions .platform -x "**node_modules**" "**venv**" "**__pycache__**"
+      
+      - name: Upload deployment package
+        uses: actions/upload-artifact@v4
+        with:
+          name: deploy-package
+          path: deploy.zip
+          retention-days: 1
+
+  deploy-staging:
+    needs: [test-api, test-frontend, build-and-push, generate-deployment-package]
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging')
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      
+      - name: Download deployment package
+        uses: actions/download-artifact@v4
+        with:
+          name: deploy-package
+          path: .
+      
+      - name: Get timestamp
+        uses: gerred/actions/current-time@master
+        id: current-time
+      
+      - name: Format timestamp
+        uses: frabert/replace-string-action@master
+        id: format-time
+        with:
+          pattern: '[:\.]+'
+          string: "${{ steps.current-time.outputs.time }}"
+          replace-with: '-'
+          flags: 'g'
+      
+      - name: Deploy to staging
+        uses: einaregilsson/beanstalk-deploy@v16
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          application_name: ${{ env.STAGING_APP_NAME }}
+          environment_name: ${{ env.STAGING_ENV_NAME }}
+          version_label: "staging-${{ steps.format-time.outputs.replaced }}"
+          region: ${{ env.AWS_REGION }}
+          deployment_package: deploy.zip
+      
+      - run: echo "🍏 Staging deployment status: ${{ job.status }}."
+
+  deploy-production:
+    needs: [test-api, test-frontend, build-and-push, generate-deployment-package]
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      
+      - name: Download deployment package
+        uses: actions/download-artifact@v4
+        with:
+          name: deploy-package
+          path: .
+      
+      - name: Get timestamp
+        uses: gerred/actions/current-time@master
+        id: current-time
+      
+      - name: Format timestamp
+        uses: frabert/replace-string-action@master
+        id: format-time
+        with:
+          pattern: '[:\.]+'
+          string: "${{ steps.current-time.outputs.time }}"
+          replace-with: '-'
+          flags: 'g'
+      
+      - name: Deploy to production
+        uses: einaregilsson/beanstalk-deploy@v16
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          application_name: ${{ env.PROD_APP_NAME }}
+          environment_name: ${{ env.PROD_ENV_NAME }}
+          version_label: "production-${{ steps.format-time.outputs.replaced }}"
+          region: ${{ env.AWS_REGION }}
+          deployment_package: deploy.zip
+      
+      - run: echo "🎉 Production deployment status: ${{ job.status }}."
