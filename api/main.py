@@ -11,7 +11,7 @@ from typing import Optional
 
 app = FastAPI(title="JobMatch AI API", version="1.0.0")
 
-# Add CORS middleware for React frontend
+# Add CORS middleware for React frontend.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],

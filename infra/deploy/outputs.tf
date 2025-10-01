@@ -42,6 +42,16 @@ output "eb_environment_url" {
   value       = aws_elastic_beanstalk_environment.main.endpoint_url
 }
 
+output "ssl_domain_url" {
+  description = "HTTPS URL for the application"
+  value       = "https://${var.record_name}.${var.domain_name}"
+}
+
+output "route53_nameservers" {
+  description = "Route53 nameservers to configure in GoDaddy"
+  value       = aws_route53_zone.hosted_zone.name_servers
+}
+
 # IAM Outputs
 output "eb_service_role_arn" {
   description = "ARN of the Elastic Beanstalk service role"
@@ -68,7 +78,10 @@ output "deployment_summary" {
     region              = var.aws_region
     vpc_id              = aws_vpc.main.id
     eb_environment_name = aws_elastic_beanstalk_environment.main.name
-    application_url     = "http://${aws_elastic_beanstalk_environment.main.endpoint_url}"
-    note                = "Application is internal-only (no internet access)"
+    application_url_http  = "http://${aws_elastic_beanstalk_environment.main.endpoint_url}"
+    application_url_https = "https://${var.record_name}.${var.domain_name}"
+    domain_name         = "${var.record_name}.${var.domain_name}"
+    certificate_arn     = aws_acm_certificate_validation.this.certificate_arn
+    note                = "HTTPS configured with SSL certificate"
   }
 }

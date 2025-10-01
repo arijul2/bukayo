@@ -89,6 +89,26 @@ variable "health_check_path" {
   default     = "/"
 }
 
+# Environment Variables
+variable "openai_api_key" {
+  description = "OpenAI API key for the application"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "dockerhub_username" {
+  description = "Docker Hub username for pulling images"
+  type        = string
+  default     = ""
+}
+
+variable "ssl_certificate_arn" {
+  description = "ARN of the SSL certificate from ACM"
+  type        = string
+  default     = ""
+}
+
 # Tags
 variable "common_tags" {
   description = "Common tags to apply to all resources"
@@ -98,4 +118,15 @@ variable "common_tags" {
     Environment = "dev"
     ManagedBy   = "terraform"
   }
+}
+
+# Route53 variables for SSL
+variable "domain_name" {
+  description = "Domain name for SSL certificate"
+  type        = string
+}
+
+variable "record_name" {
+  description = "Subdomain name for SSL certificate"
+  type        = string
 }
