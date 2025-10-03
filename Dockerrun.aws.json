@@ -24,12 +24,6 @@
       "image": "your-dockerhub-username/jobsmatch-frontend:latest",
       "essential": true,
       "memory": 256,
-      "portMappings": [
-        {
-          "hostPort": 3000,
-          "containerPort": 80
-        }
-      ],
       "mountPoints": [
         {
           "sourceVolume": "awseb-logs-frontend",
@@ -42,12 +36,6 @@
       "image": "your-dockerhub-username/jobsmatch-api:latest",
       "essential": true,
       "memory": 512,
-      "portMappings": [
-        {
-          "hostPort": 8000,
-          "containerPort": 8000
-        }
-      ],
       "environment": [
         {
           "name": "OPENAI_API_KEY",

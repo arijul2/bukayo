@@ -132,8 +132,12 @@ jobs:
       
       - name: Generate deployment package
         run: |
+          # Replace placeholder DockerHub username in Dockerrun.aws.json
+          sed "s/your-dockerhub-username/${{ secrets.DOCKERHUB_USERNAME }}/g" Dockerrun.aws.json > Dockerrun.aws.json.tmp
+          mv Dockerrun.aws.json.tmp Dockerrun.aws.json
+          
           # Create deployment package with necessary files
-          zip -r deploy.zip docker-compose.yml .ebextensions .platform -x "**node_modules**" "**venv**" "**__pycache__**"
+          zip -r deploy.zip Dockerrun.aws.json .platform -x "**node_modules**" "**venv**" "**__pycache__**"
       
       - name: Upload deployment package
         uses: actions/upload-artifact@v4
