@@ -82,8 +82,8 @@ resource "aws_security_group" "eb" {
 
   # Allow application port from internet
   ingress {
-    from_port   = var.application_port
-    to_port     = var.application_port
+    from_port   = 80
+    to_port     = 80
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -272,6 +272,19 @@ resource "aws_elastic_beanstalk_environment" "main" {
     namespace = "aws:elasticbeanstalk:environment:process:default"
     name      = "StickinessEnabled"
     value     = "false"
+  }
+
+  # HTTP Listener for port 80
+  setting {
+    namespace = "aws:elbv2:listener:80"
+    name      = "ListenerEnabled"
+    value     = "true"
+  }
+
+  setting {
+    namespace = "aws:elbv2:listener:80"
+    name      = "Protocol"
+    value     = "HTTP"
   }
 
   # Environment Variables
