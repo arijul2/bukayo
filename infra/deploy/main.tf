@@ -303,7 +303,13 @@ resource "aws_elastic_beanstalk_environment" "main" {
   setting {
     namespace = "aws:elbv2:listener:443"
     name      = "SSLCertificateArns"
-    value     = var.ssl_certificate_arn
+    value     = aws_acm_certificate_validation.this.certificate_arn
+  }
+
+  setting {
+    namespace = "aws:elbv2:listener:443"
+    name      = "DefaultProcess"
+    value     = "default"
   }
 
   # Environment Variables

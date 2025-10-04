@@ -25,6 +25,10 @@ health_check_path   = "/"
 openai_api_key     = "your-openai-api-key-here"
 dockerhub_username = "your-dockerhub-username"
 
+# SSL/Domain Configuration
+domain_name = "your-domain.com"
+record_name = "bukayo"  # Creates bukayo.your-domain.com
+
 # Common Tags
 common_tags = {
   Project     = "bukayo"

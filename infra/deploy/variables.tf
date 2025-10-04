@@ -119,3 +119,14 @@ variable "common_tags" {
     ManagedBy   = "terraform"
   }
 }
+
+# Route53 variables for SSL
+variable "domain_name" {
+  description = "Domain name for SSL certificate"
+  type        = string
+}
+
+variable "record_name" {
+  description = "Subdomain name for SSL certificate"
+  type        = string
+}
