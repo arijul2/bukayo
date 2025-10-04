@@ -1,7 +1,8 @@
 #!/bin/bash
 
-# Start the application
-docker-compose up -d
+# Set environment variables
+export DOCKERHUB_USERNAME=${DOCKERHUB_USERNAME}
+export OPENAI_API_KEY=${OPENAI_API_KEY}
 
-# Keep the container running
-tail -f /dev/null
+# Start the application using docker-compose
+docker-compose -f docker-compose.production.yml up

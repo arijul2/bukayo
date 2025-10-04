@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: ${DOCKERHUB_USERNAME}/jobsmatch-nginx:latest
+    depends_on:
+      - frontend
+      - api
+    restart: always
+    ports:
+      - "80:80"
+    environment:
+      - DOCKERHUB_USERNAME=${DOCKERHUB_USERNAME}
+
+  api:
+    image: ${DOCKERHUB_USERNAME}/jobsmatch-api:latest
+    restart: always
+    expose:
+      - "8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    volumes:
+      - ./uploads:/app/uploads
+
+  frontend:
+    image: ${DOCKERHUB_USERNAME}/jobsmatch-frontend:latest
+    restart: always
+    expose:
+      - "80"

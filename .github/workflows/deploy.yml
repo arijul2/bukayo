@@ -7,6 +7,7 @@ on:
       - 'frontend/**'
       - 'nginx/**'
       - 'docker-compose.yml'
+      - 'docker-compose.production.yml'
       - '.ebextensions/**'
       - '.platform/**'
       - '.github/workflows/deploy.yml'
@@ -132,12 +133,12 @@ jobs:
       
       - name: Generate deployment package
         run: |
-          # Replace placeholder DockerHub username in Dockerrun.aws.json
-          sed "s/your-dockerhub-username/${{ secrets.DOCKERHUB_USERNAME }}/g" Dockerrun.aws.json > Dockerrun.aws.json.tmp
-          mv Dockerrun.aws.json.tmp Dockerrun.aws.json
+          # Replace placeholder DockerHub username in docker-compose.production.yml
+          sed "s/\${DOCKERHUB_USERNAME}/${{ secrets.DOCKERHUB_USERNAME }}/g" docker-compose.production.yml > docker-compose.production.yml.tmp
+          mv docker-compose.production.yml.tmp docker-compose.production.yml
           
           # Create deployment package with necessary files
-          zip -r deploy.zip Dockerrun.aws.json .platform -x "**node_modules**" "**venv**" "**__pycache__**"
+          zip -r deploy.zip docker-compose.production.yml .platform -x "**node_modules**" "**venv**" "**__pycache__**"
       
       - name: Upload deployment package
         uses: actions/upload-artifact@v4
