@@ -89,6 +89,20 @@ variable "health_check_path" {
   default     = "/"
 }
 
+# Environment Variables
+variable "openai_api_key" {
+  description = "OpenAI API key for the application"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "dockerhub_username" {
+  description = "Docker Hub username for pulling images"
+  type        = string
+  default     = ""
+}
+
 # Tags
 variable "common_tags" {
   description = "Common tags to apply to all resources"

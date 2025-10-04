@@ -274,6 +274,19 @@ resource "aws_elastic_beanstalk_environment" "main" {
     value     = "false"
   }
 
+  # Environment Variables
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "OPENAI_API_KEY"
+    value     = var.openai_api_key
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "DOCKERHUB_USERNAME"
+    value     = var.dockerhub_username
+  }
+
   tags = {
     Name = "${var.project_name}-env"
   }
