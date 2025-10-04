@@ -132,8 +132,8 @@ jobs:
       
       - name: Generate deployment package
         run: |
-          # Replace placeholder DockerHub username in docker-compose.yml
-          sed "s/\${DOCKERHUB_USERNAME}/${{ secrets.DOCKERHUB_USERNAME }}/g" docker-compose.yml > docker-compose.yml.tmp
+          # Replace placeholder DockerHub username in docker-compose.production.yml
+          sed "s/\${DOCKERHUB_USERNAME}/${{ secrets.DOCKERHUB_USERNAME }}/g" docker-compose.production.yml > docker-compose.yml.tmp
           mv docker-compose.yml.tmp docker-compose.yml
           
           # Create deployment package with necessary files
