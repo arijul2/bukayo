@@ -103,6 +103,12 @@ variable "dockerhub_username" {
   default     = ""
 }
 
+variable "ssl_certificate_arn" {
+  description = "ARN of the SSL certificate from ACM"
+  type        = string
+  default     = ""
+}
+
 # Tags
 variable "common_tags" {
   description = "Common tags to apply to all resources"
