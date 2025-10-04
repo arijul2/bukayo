@@ -6,27 +6,19 @@ services:
       - frontend
       - api
     restart: always
-    build:
-      dockerfile: Dockerfile.production
-      context: ./nginx
+    image: ${DOCKERHUB_USERNAME}/jobsmatch-nginx:latest
     ports:
       - "80:80"
 
   api:
     platform: linux/amd64
-    build:
-      dockerfile: Dockerfile
-      context: ./api
-    volumes:
-      - ./api/uploads:/app/uploads
+    image: ${DOCKERHUB_USERNAME}/jobsmatch-api:latest
     expose:
       - "8000"
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
 
   frontend:
-    build:
-      dockerfile: Dockerfile
-      context: ./frontend
+    image: ${DOCKERHUB_USERNAME}/jobsmatch-frontend:latest
     expose:
       - "80"
