@@ -11,7 +11,6 @@ on:
       - '.github/workflows/deploy.yml'
     branches:
       - main
-      - prod-deploy
   pull_request:
     branches:
       - main
@@ -148,7 +147,7 @@ jobs:
 
   deploy-production:
     needs: [test-api, test-frontend, build-and-push, generate-deployment-package]
-    if: (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/prod-deploy')) || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production')
+    if: (github.event_name == 'push' && (github.ref == 'refs/heads/main')) || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production')
     runs-on: ubuntu-latest
     environment: production
     steps:
