@@ -1,5 +1,5 @@
-name: Deploy JobMatch AI Application
-run-name: ${{ github.actor }} is deploying JobMatch AI 🚀
+name: Deploy JobsMatch AI Application
+run-name: ${{ github.actor }} is deploying JobsMatch AI 🚀
 on:
   push:
     paths:
