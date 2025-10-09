@@ -92,7 +92,7 @@ async def upload_resume(file: UploadFile = File(...)):
 
 @app.post("/upload-job-description/")
 async def upload_job_description(file: UploadFile = File(...)):
-    """Upload a job description file (PDF, DOC, DOCX, or TXT)"""
+    """Upload a job description file to S3"""
     if not file.filename:
         raise HTTPException(status_code=400, detail="No file uploaded")
     
@@ -110,12 +110,20 @@ async def upload_job_description(file: UploadFile = File(...)):
             detail=f"File too large. Maximum size: {MAX_FILE_SIZE // (1024*1024)}MB"
         )
     
+    # Generate S3 key with UUID but store original filename in metadata
     unique_filename = f"{uuid.uuid4()}{file_extension}"
-    file_path = JOB_UPLOAD_DIR / unique_filename
+    s3_key = f"job_descriptions/{unique_filename}"
     
     try:
-        async with aiofiles.open(file_path, 'wb') as f:
-            await f.write(content)
+        result = s3_service.upload_file(
+            file_content=content,
+            s3_key=s3_key,
+            original_filename=file.filename,
+            file_type="job_description"
+        )
+        
+        if not result["success"]:
+            raise HTTPException(status_code=500, detail=f"Failed to upload to S3: {result['error']}")
         
         return JSONResponse(
             status_code=200,
@@ -124,14 +132,12 @@ async def upload_job_description(file: UploadFile = File(...)):
                 "filename": unique_filename,
                 "original_filename": file.filename,
                 "file_size": len(content),
-                "file_path": str(file_path),
+                "s3_key": s3_key,
                 "file_type": "job_description"
             }
         )
     
     except Exception as e:
-        if file_path.exists():
-            os.remove(file_path)
         raise HTTPException(status_code=500, detail=f"Failed to save file: {str(e)}")
 
 @app.post("/analyze-job-match/")
@@ -241,34 +247,18 @@ async def root():
 
 @app.get("/resumes/")
 async def list_resumes():
-    """List all uploaded resume files"""
+    """List all uploaded resume files from S3"""
     try:
-        files = []
-        for file_path in RESUME_UPLOAD_DIR.iterdir():
-            if file_path.is_file():
-                files.append({
-                    "filename": file_path.name,
-                    "size": file_path.stat().st_size,
-                    "created": file_path.stat().st_ctime,
-                    "type": "resume"
-                })
+        files = s3_service.list_files("resumes/")
         return {"resumes": files}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to list files: {str(e)}")
 
 @app.get("/job-descriptions/")
 async def list_job_descriptions():
-    """List all uploaded job description files"""
+    """List all uploaded job description files from S3"""
     try:
-        files = []
-        for file_path in JOB_UPLOAD_DIR.iterdir():
-            if file_path.is_file():
-                files.append({
-                    "filename": file_path.name,
-                    "size": file_path.stat().st_size,
-                    "created": file_path.stat().st_ctime,
-                    "type": "job_description"
-                })
+        files = s3_service.list_files("job_descriptions/")
         return {"job_descriptions": files}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to list files: {str(e)}")
