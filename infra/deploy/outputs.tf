@@ -63,6 +63,22 @@ output "eb_instance_profile_arn" {
   value       = aws_iam_instance_profile.eb_instance_profile.arn
 }
 
+# S3 Bucket Outputs
+output "s3_bucket_name" {
+  description = "Name of the S3 bucket for file storage"
+  value       = aws_s3_bucket.app_storage.bucket
+}
+
+output "s3_bucket_arn" {
+  description = "ARN of the S3 bucket"
+  value       = aws_s3_bucket.app_storage.arn
+}
+
+output "s3_bucket_domain_name" {
+  description = "Domain name of the S3 bucket"
+  value       = aws_s3_bucket.app_storage.bucket_domain_name
+}
+
 # Application URL (internal only)
 output "application_url" {
   description = "Internal URL to access the application (from within VPC)"
@@ -82,6 +98,8 @@ output "deployment_summary" {
     application_url_https = "https://${var.record_name}.${var.domain_name}"
     domain_name         = "${var.record_name}.${var.domain_name}"
     certificate_arn     = aws_acm_certificate_validation.this.certificate_arn
-    note                = "HTTPS configured with SSL certificate"
+    s3_bucket_name      = aws_s3_bucket.app_storage.bucket
+    s3_bucket_arn       = aws_s3_bucket.app_storage.arn
+    note                = "HTTPS configured with SSL certificate, S3 bucket created for file storage"
   }
 }
