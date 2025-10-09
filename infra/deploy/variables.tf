@@ -91,14 +91,14 @@ variable "health_check_path" {
 
 # Environment Variables
 variable "openai_api_key" {
-  description = "OpenAI API key for the application"
+  description = "OpenAI API key for the application (set via TF_VAR_openai_api_key environment variable)"
   type        = string
   sensitive   = true
   default     = ""
 }
 
 variable "dockerhub_username" {
-  description = "Docker Hub username for pulling images"
+  description = "Docker Hub username for pulling images (set via TF_VAR_dockerhub_username environment variable)"
   type        = string
   default     = ""
 }
