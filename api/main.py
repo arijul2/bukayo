@@ -1,5 +1,5 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException, Form
-from fastapi.responses import JSONResponse, FileResponse
+from fastapi.responses import JSONResponse, FileResponse, Response
 from fastapi.middleware.cors import CORSMiddleware
 import os
 import aiofiles
@@ -265,31 +265,31 @@ async def list_job_descriptions():
 
 @app.get("/download-resume/{filename}")
 async def download_resume(filename: str):
-    """Download a specific resume file"""
-    file_path = RESUME_UPLOAD_DIR / filename
-    
-    if not file_path.exists():
-        raise HTTPException(status_code=404, detail="File not found")
-    
-    return FileResponse(
-        path=file_path,
-        filename=filename,
-        media_type='application/octet-stream'
-    )
+    """Download a specific resume file from S3"""
+    s3_key = f"resumes/{filename}"
+    try:
+        file_content = s3_service.download_file(s3_key)
+        return Response(
+            content=file_content,
+            media_type="application/octet-stream",
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=f"File not found: {str(e)}")
 
 @app.get("/download-job-description/{filename}")
 async def download_job_description(filename: str):
-    """Download a specific job description file"""
-    file_path = JOB_UPLOAD_DIR / filename
-    
-    if not file_path.exists():
-        raise HTTPException(status_code=404, detail="File not found")
-    
-    return FileResponse(
-        path=file_path,
-        filename=filename,
-        media_type='application/octet-stream'
-    )
+    """Download a specific job description file from S3"""
+    s3_key = f"job_descriptions/{filename}"
+    try:
+        file_content = s3_service.download_file(s3_key)
+        return Response(
+            content=file_content,
+            media_type="application/octet-stream",
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=f"File not found: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn
