@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 
 interface FileInfo {
   filename: string;
+  original_filename: string;
   size: number;
   created: number;
   type: string;
@@ -138,8 +139,7 @@ const JobAnalysis: React.FC = () => {
                 <option value="">Choose a resume...</option>
                 {resumes.map((resume) => (
                   <option key={resume.filename} value={resume.filename}>
-                    {resume.filename.substring(0, 20)}... (
-                    {(resume.size / 1024).toFixed(1)}KB)
+                    {resume.original_filename} ({(resume.size / 1024).toFixed(1)}KB)
                   </option>
                 ))}
               </select>
@@ -158,8 +158,7 @@ const JobAnalysis: React.FC = () => {
                 <option value="">Choose a job description...</option>
                 {jobDescriptions.map((job) => (
                   <option key={job.filename} value={job.filename}>
-                    {job.filename.substring(0, 20)}... (
-                    {(job.size / 1024).toFixed(1)}KB)
+                    {job.original_filename} ({(job.size / 1024).toFixed(1)}KB)
                   </option>
                 ))}
               </select>
