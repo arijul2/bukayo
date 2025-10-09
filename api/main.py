@@ -7,6 +7,7 @@ from pathlib import Path
 import uuid
 from document_processor import DocumentProcessor
 from job_matcher import JobMatcher
+from s3_service import S3Service
 from typing import Optional
 
 app = FastAPI(title="JobMatch AI API", version="1.0.0")
@@ -20,14 +21,11 @@ app.add_middleware(
     allow_headers=["*"],        
 )
 
-# Create uploads directories if they don't exist
-RESUME_UPLOAD_DIR = Path("uploads/resumes")
-JOB_UPLOAD_DIR = Path("uploads/job_descriptions")
-RESUME_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-JOB_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-
 # Initialize processors
 doc_processor = DocumentProcessor()
+
+# Initialize S3 service
+s3_service = S3Service()
 
 # Initialize job matcher (you'll need to set your OpenAI API key)
 OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
@@ -44,7 +42,7 @@ MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 
 @app.post("/upload-resume/")
 async def upload_resume(file: UploadFile = File(...)):
-    """Upload a resume file (PDF, DOC, DOCX, or TXT)"""
+    """Upload a resume file to S3"""
     if not file.filename:
         raise HTTPException(status_code=400, detail="No file uploaded")
     
@@ -62,12 +60,20 @@ async def upload_resume(file: UploadFile = File(...)):
             detail=f"File too large. Maximum size: {MAX_FILE_SIZE // (1024*1024)}MB"
         )
     
+    # Generate S3 key with UUID but store original filename in metadata
     unique_filename = f"{uuid.uuid4()}{file_extension}"
-    file_path = RESUME_UPLOAD_DIR / unique_filename
+    s3_key = f"resumes/{unique_filename}"
     
     try:
-        async with aiofiles.open(file_path, 'wb') as f:
-            await f.write(content)
+        result = s3_service.upload_file(
+            file_content=content,
+            s3_key=s3_key,
+            original_filename=file.filename,
+            file_type="resume"
+        )
+        
+        if not result["success"]:
+            raise HTTPException(status_code=500, detail=f"Failed to upload to S3: {result['error']}")
         
         return JSONResponse(
             status_code=200,
@@ -76,14 +82,12 @@ async def upload_resume(file: UploadFile = File(...)):
                 "filename": unique_filename,
                 "original_filename": file.filename,
                 "file_size": len(content),
-                "file_path": str(file_path),
+                "s3_key": s3_key,
                 "file_type": "resume"
             }
         )
     
     except Exception as e:
-        if file_path.exists():
-            os.remove(file_path)
         raise HTTPException(status_code=500, detail=f"Failed to save file: {str(e)}")
 
 @app.post("/upload-job-description/")
