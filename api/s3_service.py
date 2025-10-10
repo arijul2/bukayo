@@ -1,21 +1,25 @@
 import boto3
 import os
-from typing import Dict, List, Optional
+from typing import Dict, List
 from botocore.exceptions import ClientError
 import time
 
 class S3Service:
     def __init__(self):
+        # Get bucket name and strip any whitespace
+        bucket_name_raw = os.environ.get('S3_BUCKET_NAME')
+        if not bucket_name_raw:
+            raise ValueError("S3_BUCKET_NAME environment variable is required")
+        
+        self.bucket_name = bucket_name_raw.strip()
+        if not self.bucket_name:
+            raise ValueError("S3_BUCKET_NAME environment variable is empty or contains only whitespace")
+        
+        # Create S3 client - uses instance profile credentials automatically
         self.s3_client = boto3.client(
             's3',
-            aws_access_key_id=os.environ.get('AWS_ACCESS_KEY_ID'),
-            aws_secret_access_key=os.environ.get('AWS_SECRET_ACCESS_KEY'),
-            region_name=os.environ.get('AWS_REGION', 'us-east-1')
+            region_name=os.environ.get('AWS_REGION', 'us-west-2')
         )
-        self.bucket_name = os.environ.get('S3_BUCKET_NAME')
-        
-        if not self.bucket_name:
-            raise ValueError("S3_BUCKET_NAME environment variable is required")
 
     def upload_file(self, file_content: bytes, s3_key: str, 
                    original_filename: str, file_type: str) -> Dict:
