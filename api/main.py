@@ -153,42 +153,55 @@ async def analyze_job_match(
         job_filename: Filename of uploaded job description
     """
     
-    resume_path = RESUME_UPLOAD_DIR / resume_filename
-    job_path = JOB_UPLOAD_DIR / job_filename
-    
-    # Validate files exist
-    if not resume_path.exists():
-        raise HTTPException(status_code=404, detail=f"Resume file not found: {resume_filename}")
-    
-    if not job_path.exists():
-        raise HTTPException(status_code=404, detail=f"Job description file not found: {job_filename}")
-    
     try:
-        # Extract text from both documents
-        resume_data = doc_processor.process_resume(str(resume_path))
-        job_data = doc_processor.process_job_description(str(job_path))
+        # Download files from S3
+        resume_s3_key = f"resumes/{resume_filename}"
+        job_s3_key = f"job_descriptions/{job_filename}"
         
-        resume_text = resume_data["raw_text"]
-        job_text = job_data["raw_text"]
+        resume_content = s3_service.download_file(resume_s3_key)
+        job_content = s3_service.download_file(job_s3_key)
         
-        # Perform AI analysis
-        analysis_result = job_matcher.analyze_job_match(resume_text, job_text)
+        # Save temporarily to process with document processor
+        import tempfile
+        with tempfile.NamedTemporaryFile(delete=False, suffix=Path(resume_filename).suffix) as temp_resume:
+            temp_resume.write(resume_content)
+            temp_resume_path = temp_resume.name
+            
+        with tempfile.NamedTemporaryFile(delete=False, suffix=Path(job_filename).suffix) as temp_job:
+            temp_job.write(job_content)
+            temp_job_path = temp_job.name
         
-        # Add file metadata to response
-        analysis_result.update({
-            "resume_filename": resume_filename,
-            "job_filename": job_filename,
-            "resume_metadata": resume_data["metadata"],
-            "job_metadata": job_data["metadata"]
-        })
-        
-        return JSONResponse(
-            status_code=200,
-            content={
-                "message": "Job match analysis completed successfully",
-                "analysis": analysis_result
-            }
-        )
+        try:
+            # Extract text from both documents
+            resume_data = doc_processor.process_resume(temp_resume_path)
+            job_data = doc_processor.process_job_description(temp_job_path)
+            
+            resume_text = resume_data["raw_text"]
+            job_text = job_data["raw_text"]
+            
+            # Perform AI analysis
+            analysis_result = job_matcher.analyze_job_match(resume_text, job_text)
+            
+            # Add file metadata to response
+            analysis_result.update({
+                "resume_filename": resume_filename,
+                "job_filename": job_filename,
+                "resume_metadata": resume_data["metadata"],
+                "job_metadata": job_data["metadata"]
+            })
+            
+            return JSONResponse(
+                status_code=200,
+                content={
+                    "message": "Job match analysis completed successfully",
+                    "analysis": analysis_result
+                }
+            )
+            
+        finally:
+            # Clean up temporary files
+            os.unlink(temp_resume_path)
+            os.unlink(temp_job_path)
         
     except Exception as e:
         raise HTTPException(
@@ -200,34 +213,54 @@ async def analyze_job_match(
 async def process_document(filename: str, doc_type: str):
     """Test endpoint to process a document and extract text"""
     if doc_type == "resume":
-        file_path = RESUME_UPLOAD_DIR / filename
-        if not file_path.exists():
-            raise HTTPException(status_code=404, detail="Resume file not found")
-        
+        s3_key = f"resumes/{filename}"
         try:
-            result = doc_processor.process_resume(str(file_path))
-            return JSONResponse(content={
-                "message": "Resume processed successfully",
-                "filename": filename,
-                "processing_result": result
-            })
+            file_content = s3_service.download_file(s3_key)
+            
+            # Save temporarily to process with document processor
+            import tempfile
+            with tempfile.NamedTemporaryFile(delete=False, suffix=Path(filename).suffix) as temp_file:
+                temp_file.write(file_content)
+                temp_file_path = temp_file.name
+            
+            try:
+                result = doc_processor.process_resume(temp_file_path)
+                return JSONResponse(content={
+                    "message": "Resume processed successfully",
+                    "filename": filename,
+                    "processing_result": result
+                })
+            finally:
+                # Clean up temporary file
+                os.unlink(temp_file_path)
+                
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Failed to process resume: {str(e)}")
+            raise HTTPException(status_code=404, detail=f"Resume file not found: {str(e)}")
     
     elif doc_type == "job_description":
-        file_path = JOB_UPLOAD_DIR / filename
-        if not file_path.exists():
-            raise HTTPException(status_code=404, detail="Job description file not found")
-        
+        s3_key = f"job_descriptions/{filename}"
         try:
-            result = doc_processor.process_job_description(str(file_path))
-            return JSONResponse(content={
-                "message": "Job description processed successfully",
-                "filename": filename,
-                "processing_result": result
-            })
+            file_content = s3_service.download_file(s3_key)
+            
+            # Save temporarily to process with document processor
+            import tempfile
+            with tempfile.NamedTemporaryFile(delete=False, suffix=Path(filename).suffix) as temp_file:
+                temp_file.write(file_content)
+                temp_file_path = temp_file.name
+            
+            try:
+                result = doc_processor.process_job_description(temp_file_path)
+                return JSONResponse(content={
+                    "message": "Job description processed successfully",
+                    "filename": filename,
+                    "processing_result": result
+                })
+            finally:
+                # Clean up temporary file
+                os.unlink(temp_file_path)
+                
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Failed to process job description: {str(e)}")
+            raise HTTPException(status_code=404, detail=f"Job description file not found: {str(e)}")
     
     else:
         raise HTTPException(status_code=400, detail="doc_type must be 'resume' or 'job_description'")
