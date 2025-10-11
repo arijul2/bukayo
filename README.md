@@ -6,3 +6,6 @@ Start server with
 ```
 uvicorn main:app --reload
 ```
+
+source ~/.terraform-bukayo
+terraform apply
