@@ -152,11 +152,16 @@ async def analyze_job_match(
         resume_filename: Filename of uploaded resume
         job_filename: Filename of uploaded job description
     """
-    
+    print(f'>>>>>>>>>>>>>>>>>>>>')
+    print(f'Resume filename: {resume_filename}')
+    print(f'Job filename: {job_filename}')
+    print(f'>>>>>>>>>>>>>>>>>>>>')
+
+
     try:
         # Download files from S3
-        resume_s3_key = f"resumes/{resume_filename}"
-        job_s3_key = f"job_descriptions/{job_filename}"
+        resume_s3_key = resume_filename
+        job_s3_key = job_filename
         
         resume_content = s3_service.download_file(resume_s3_key)
         job_content = s3_service.download_file(job_s3_key)
