@@ -71,7 +71,7 @@ async def upload_resume(file: UploadFile = File(...)):
             original_filename=file.filename,
             file_type="resume"
         )
-        
+
         if not result["success"]:
             raise HTTPException(status_code=500, detail=f"Failed to upload to S3: {result['error']}")
         
