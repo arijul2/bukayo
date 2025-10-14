@@ -152,11 +152,6 @@ async def analyze_job_match(
         resume_filename: Filename of uploaded resume
         job_filename: Filename of uploaded job description
     """
-    print(f'>>>>>>>>>>>>>>>>>>>>')
-    print(f'Resume filename: {resume_filename}')
-    print(f'Job filename: {job_filename}')
-    print(f'>>>>>>>>>>>>>>>>>>>>')
-
 
     try:
         # Download files from S3
