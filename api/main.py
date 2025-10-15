@@ -12,6 +12,11 @@ from typing import Optional
 
 app = FastAPI(title="JobMatch AI API", version="1.0.0")
 
+@app.get("/")
+async def health_check():
+    """Health check endpoint for Elastic Beanstalk"""
+    return {"status": "healthy", "service": "bukayo-api", "version": "1.0.0"}
+
 # Add CORS middleware for React frontend.
 app.add_middleware(
     CORSMiddleware,
