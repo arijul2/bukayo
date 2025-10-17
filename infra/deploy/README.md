@@ -67,7 +67,7 @@ The infrastructure includes:
 - `project_name`: Name of the project (default: "bukayo")
 - `environment`: Environment name (default: "dev")
 - `vpc_cidr`: CIDR block for VPC (default: "10.0.0.0/16")
-- `instance_type`: EC2 instance type (default: "t3.micro")
+- `instance_type`: EC2 instance type (default: "t3.small")
 - `min_size`: Minimum instances (default: "1")
 - `max_size`: Maximum instances (default: "3")
 

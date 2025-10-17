@@ -61,7 +61,7 @@ variable "solution_stack_name" {
 variable "instance_type" {
   description = "EC2 instance type for Elastic Beanstalk"
   type        = string
-  default     = "t3.micro"
+  default     = "t3.small"
 }
 
 variable "min_size" {
@@ -73,7 +73,7 @@ variable "min_size" {
 variable "max_size" {
   description = "Maximum number of instances in Auto Scaling Group"
   type        = string
-  default     = "3"
+  default     = "2"
 }
 
 # Application Configuration
