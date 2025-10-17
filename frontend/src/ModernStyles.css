@@ -523,3 +523,21 @@ body {
   transform: none !important;
   box-shadow: 0 4px 15px rgba(79, 172, 254, 0.2) !important;
 }
+
+/* Download PDF Button */
+.btn-light {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  color: #333 !important;
+  border-radius: 8px !important;
+  padding: 0.5rem 1rem !important;
+  font-weight: 500 !important;
+  transition: var(--transition) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.btn-light:hover {
+  background: rgba(255, 255, 255, 1) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
