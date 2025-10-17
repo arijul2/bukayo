@@ -179,3 +179,93 @@ ANALYSIS:
         results.sort(key=lambda x: x.get("match_score", 0), reverse=True)
         
         return results
+    
+    def generate_cover_letter(self, resume_text: str, job_description: str, analysis_result: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Generate a personalized cover letter based on resume, job description, and analysis
+        
+        Args:
+            resume_text: Extracted text from resume
+            job_description: Extracted text from job posting
+            analysis_result: The analysis result from analyze_job_match
+            
+        Returns:
+            Dictionary containing the generated cover letter and metadata
+        """
+        try:
+            # Extract key information from analysis
+            match_score = analysis_result.get("match_score", 0)
+            strengths = analysis_result.get("strengths", [])
+            experience_match = analysis_result.get("experience_match", "")
+            education_match = analysis_result.get("education_match", "")
+            detailed_reasoning = analysis_result.get("detailed_reasoning", "")
+            
+            # Only generate if it's a strong match (70%+)
+            if match_score < 70:
+                return {
+                    "success": False,
+                    "error": "Cover letter generation only available for matches with 70%+ score",
+                    "match_score": match_score
+                }
+            
+            prompt = f"""
+You are an expert career counselor and professional writer. Generate a compelling, personalized cover letter 
+that highlights the candidate's strengths and addresses the specific job requirements.
+
+RESUME:
+{resume_text}
+
+JOB DESCRIPTION:
+{job_description}
+
+ANALYSIS INSIGHTS:
+- Match Score: {match_score}%
+- Key Strengths: {', '.join(strengths) if strengths else 'Not specified'}
+- Experience Match: {experience_match}
+- Education Match: {education_match}
+- Detailed Analysis: {detailed_reasoning}
+
+COVER LETTER REQUIREMENTS:
+1. Professional, engaging tone that shows enthusiasm
+2. Address the hiring manager directly (use "Dear Hiring Manager" if no name available)
+3. Highlight specific skills and experiences that match the job requirements
+4. Reference specific achievements or qualifications from the resume
+5. Address any potential gaps mentioned in the analysis
+6. Show knowledge of the company/role (if evident from job description)
+7. End with a strong call to action
+8. Keep it concise but comprehensive (3-4 paragraphs)
+9. Use the candidate's actual name and details from the resume
+
+Please generate a professional cover letter that would help this candidate stand out for this specific position.
+
+COVER LETTER:
+"""
+
+            response = self.client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You are an expert career counselor and professional writer. Generate compelling, personalized cover letters that help candidates stand out."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.7,  # Slightly higher for more creative writing
+                max_tokens=1000
+            )
+            
+            cover_letter_text = response.choices[0].message.content.strip()
+            
+            return {
+                "success": True,
+                "cover_letter": cover_letter_text,
+                "match_score": match_score,
+                "generation_timestamp": datetime.now().isoformat(),
+                "ai_model": "gpt-3.5-turbo",
+                "processing_status": "success"
+            }
+            
+        except Exception as e:
+            return {
+                "success": False,
+                "error": f"Cover letter generation failed: {str(e)}",
+                "processing_status": "error",
+                "generation_timestamp": datetime.now().isoformat()
+            }
