@@ -209,6 +209,81 @@ async def analyze_job_match(
             detail=f"Analysis failed: {str(e)}"
         )
 
+@app.post("/generate-cover-letter/")
+async def generate_cover_letter(
+    resume_filename: str = Form(...),
+    job_filename: str = Form(...)
+):
+    """
+    Generate a personalized cover letter based on resume, job description, and analysis
+    
+    Args:
+        resume_filename: Filename of uploaded resume
+        job_filename: Filename of uploaded job description
+        
+    Returns:
+        Generated cover letter with metadata
+    """
+    try:
+        # Download files from S3
+        resume_s3_key = resume_filename
+        job_s3_key = job_filename
+        
+        resume_content = s3_service.download_file(resume_s3_key)
+        job_content = s3_service.download_file(job_s3_key)
+        
+        # Save temporarily to process with document processor
+        import tempfile
+        with tempfile.NamedTemporaryFile(delete=False, suffix=Path(resume_filename).suffix) as temp_resume:
+            temp_resume.write(resume_content)
+            temp_resume_path = temp_resume.name
+            
+        with tempfile.NamedTemporaryFile(delete=False, suffix=Path(job_filename).suffix) as temp_job:
+            temp_job.write(job_content)
+            temp_job_path = temp_job.name
+        
+        try:
+            # Extract text from both documents
+            resume_data = doc_processor.process_resume(temp_resume_path)
+            job_data = doc_processor.process_job_description(temp_job_path)
+            
+            resume_text = resume_data["raw_text"]
+            job_text = job_data["raw_text"]
+            
+            # First perform analysis to get insights
+            analysis_result = job_matcher.analyze_job_match(resume_text, job_text)
+            
+            # Generate cover letter using the analysis
+            cover_letter_result = job_matcher.generate_cover_letter(resume_text, job_text, analysis_result)
+            
+            # Add file metadata to response
+            cover_letter_result.update({
+                "resume_filename": resume_filename,
+                "job_filename": job_filename,
+                "resume_metadata": resume_data["metadata"],
+                "job_metadata": job_data["metadata"],
+                "analysis_result": analysis_result
+            })
+            
+            return JSONResponse(
+                status_code=200,
+                content={
+                    "message": "Cover letter generation completed successfully",
+                    "result": cover_letter_result
+                }
+            )
+            
+        finally:
+            # Clean up temporary files
+            os.unlink(temp_resume_path)
+            os.unlink(temp_job_path)
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Cover letter generation failed: {str(e)}"
+        )
+
 @app.post("/process-document/{filename}")
 async def process_document(filename: str, doc_type: str):
     """Test endpoint to process a document and extract text"""
@@ -274,6 +349,7 @@ async def root():
             "upload_resume": "/upload-resume/",
             "upload_job": "/upload-job-description/",
             "analyze_match": "/analyze-job-match/",
+            "generate_cover_letter": "/generate-cover-letter/",
             "docs": "/docs"
         }
     }
