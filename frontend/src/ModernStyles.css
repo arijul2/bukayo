@@ -469,3 +469,57 @@ body {
   border: none !important;
   backdrop-filter: blur(10px) !important;
 }
+
+/* Cover Letter Styles */
+.cover-letter-section {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.cover-letter-content {
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.cover-letter-text {
+  font-family: 'Georgia', 'Times New Roman', serif;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin: 0;
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.cover-letter-metadata {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+/* Generate Cover Letter Button */
+.btn-success {
+  background: var(--success-gradient) !important;
+  border: none !important;
+  border-radius: 12px !important;
+  padding: 0.75rem 2rem !important;
+  font-weight: 600 !important;
+  transition: var(--transition) !important;
+  box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4) !important;
+}
+
+.btn-success:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(79, 172, 254, 0.6) !important;
+}
+
+.btn-success:disabled {
+  opacity: 0.7 !important;
+  transform: none !important;
+  box-shadow: 0 4px 15px rgba(79, 172, 254, 0.2) !important;
+}
